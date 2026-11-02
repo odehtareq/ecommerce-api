@@ -253,8 +253,10 @@ async function deactivateProduct(req, res) {
   }
 }
 
-module.exports = {getProducts,
-     getProductById,
-      createProduct,
-       updateProduct,
-        deactivateProduct};
+module.exports = {
+  getProducts,
+  getProductById,
+  createProduct,
+  updateProduct,
+  deactivateProduct
+};
