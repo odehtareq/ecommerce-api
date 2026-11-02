@@ -3,6 +3,7 @@ const cors = require("cors");
 const productsRoutes = require("./routes/productsRoutes");
 const categoriesRoutes = require("./routes/categoriesRoutes");
 const usersRoutes = require("./routes/usersRoutes");
+const authRoutes = require("./routes/authRoutes")
 const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
@@ -20,6 +21,7 @@ app.get("/", (req, res) => {
 app.use("/api/products", productsRoutes);
 app.use("/api/categories", categoriesRoutes);
 app.use("/api/users", usersRoutes);
+app.use("/api/auth", authRoutes);
 
 app.use((req, res) => {
   res.status(404).json({
