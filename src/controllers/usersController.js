@@ -1,4 +1,5 @@
 const pool = require("../config/database");
+const bcrypt = require("bcrypt");
 
 const USER_COLUMNS = "id, full_name, email, phone, role, is_active, created_at";
 
@@ -57,30 +58,23 @@ async function getUserById(req, res) {
 
 async function createUser(req, res) {
   try {
-    const { full_name, email, phone } = req.body || {};
+    const { full_name, email, phone, password } = req.body;
 
-    if (
-      !full_name || typeof full_name !== "string" || !full_name.trim() ||
-      !email || typeof email !== "string" || !email.trim()
-    ) {
+    if (!password) {
       return res.status(400).json({
         success: false,
-        message: "full_name and email are required"
+        message: "Validation failed",
+        errors: [{ field: "password", message: "Password is required" }]
       });
     }
 
-    if (!email.includes("@")) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid email format"
-      });
-    }
+    const passwordHash = await bcrypt.hash(password, 12);
 
     const result = await pool.query(
-      `INSERT INTO users (full_name, email, phone)
-       VALUES ($1, $2, $3)
+      `INSERT INTO users (full_name, email, phone, password_hash)
+       VALUES ($1, $2, $3, $4)
        RETURNING ${USER_COLUMNS}`,
-      [full_name.trim(), email.trim().toLowerCase(), phone || null]
+      [full_name, email, phone || null, passwordHash]
     );
 
     res.status(201).json({
@@ -96,7 +90,7 @@ async function createUser(req, res) {
       });
     }
 
-    console.error(error);
+    console.error("Failed to create user:", error.code || error.message);
     res.status(500).json({
       success: false,
       message: "Failed to create user"
