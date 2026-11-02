@@ -1,28 +1,44 @@
 const pool = require("../config/database"); 
  
-async function getProducts(req, res) { 
-  try { 
-    const result = await pool.query(` 
-      SELECT id, category_id, name, description, 
-             price, stock_quantity, sku, is_active, created_at 
-      FROM products 
-      ORDER BY id DESC 
-    `); 
- 
-    res.status(200).json({ 
-      success: true, 
-      count: result.rows.length, 
-      data: result.rows 
-    }); 
-  } catch (error) {
-    console.error(error); 
-    res.status(500).json({ 
-      success: false, 
-      message: "Failed to retrieve products" 
-    }); 
-  } 
-} 
+async function getProducts(req, res) {
+  try {
+    const search = typeof req.query.search === "string"
+      ? req.query.search.trim().slice(0, 100)
+      : "";
 
+    let result;
+
+    if (search) {
+      result = await pool.query(
+        `SELECT id, category_id, name, description,
+                price, stock_quantity, sku, is_active, created_at
+         FROM products
+         WHERE name ILIKE $1
+         ORDER BY id DESC`,
+        [`%${search}%`]
+      );
+    } else {
+      result = await pool.query(
+        `SELECT id, category_id, name, description,
+                price, stock_quantity, sku, is_active, created_at
+         FROM products
+         ORDER BY id DESC`
+      );
+    }
+
+    res.status(200).json({
+      success: true,
+      count: result.rows.length,
+      data: result.rows
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to retrieve products"
+    });
+  }
+}
 async function getProductById(req, res) {
   try {
     const productId = Number(req.params.id);
