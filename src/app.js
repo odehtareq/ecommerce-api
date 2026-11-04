@@ -8,6 +8,7 @@ const authRoutes = require("./routes/authRoutes");
 const notFound = require("./middleware/notFound");
 const errorHandler = require("./middleware/errorHandler");
 const { apiLimiter, loginLimiter } = require("./middleware/rateLimiter");
+const rejectMarkup = require("./middleware/rejectMarkup");
 
 const app = express();
 
@@ -41,6 +42,7 @@ app.get("/", (req, res) => {
 
 app.use("/api", apiLimiter);
 app.use("/api/auth/login", loginLimiter);
+app.use("/api", rejectMarkup);
 
 app.use("/api/products", productsRoutes);
 app.use("/api/categories", categoriesRoutes);
