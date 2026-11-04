@@ -5,6 +5,7 @@ const productsRoutes = require("./routes/productsRoutes");
 const categoriesRoutes = require("./routes/categoriesRoutes");
 const usersRoutes = require("./routes/usersRoutes");
 const authRoutes = require("./routes/authRoutes");
+const notFound = require("./middleware/notFound");
 const errorHandler = require("./middleware/errorHandler");
 const { apiLimiter, loginLimiter } = require("./middleware/rateLimiter");
 
@@ -46,13 +47,14 @@ app.use("/api/categories", categoriesRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/auth", authRoutes);
 
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: "API route not found"
+// Test-only route to prove errors do not leak details. Disabled in production.
+if (process.env.NODE_ENV !== "production") {
+  app.get("/api/__test-error", (req, res, next) => {
+    next(new Error("Secret detail: SELECT * FROM users WHERE password = 'x'"));
   });
-});
+}
 
+app.use(notFound);
 app.use(errorHandler);
 
 module.exports = app;
