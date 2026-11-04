@@ -8,6 +8,7 @@ const {
 const validate = require("../middleware/validate");
 const authenticate = require("../middleware/authenticate");
 const authorize = require("../middleware/authorize");
+const authorizeSelfOrAdmin = require("../middleware/authorizeSelfOrAdmin");
 const { idParam } = require("../validators/commonValidators");
 const {
   createUserRules,
@@ -16,9 +17,8 @@ const {
 
 const router = express.Router();
 
-// Admin only for now. Task 8 (IDOR) will let a user read their own record.
 router.get("/", authenticate, authorize("admin"), getUsers);
-router.get("/:id", authenticate, authorize("admin"), idParam, validate, getUserById);
+router.get("/:id", authenticate, idParam, validate, authorizeSelfOrAdmin, getUserById);
 router.post("/", authenticate, authorize("admin"), createUserRules, validate, createUser);
 router.patch("/:id/status", authenticate, authorize("admin"), idParam, updateUserStatusRules, validate, updateUserStatus);
 
