@@ -6,6 +6,7 @@ const categoriesRoutes = require("./routes/categoriesRoutes");
 const usersRoutes = require("./routes/usersRoutes");
 const authRoutes = require("./routes/authRoutes");
 const errorHandler = require("./middleware/errorHandler");
+const { apiLimiter, loginLimiter } = require("./middleware/rateLimiter");
 
 const app = express();
 
@@ -36,6 +37,9 @@ app.get("/", (req, res) => {
     message: "E-commerce API is running"
   });
 });
+
+app.use("/api", apiLimiter);
+app.use("/api/auth/login", loginLimiter);
 
 app.use("/api/products", productsRoutes);
 app.use("/api/categories", categoriesRoutes);
